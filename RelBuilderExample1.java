@@ -58,12 +58,12 @@ public class RelBuilderExample1 {
     default: throw new AssertionError("Unknown example: " + i);
     }
   }
-
-  // Example implementations
+// now here we have our first example simple select * from BONUS
   private RelBuilder example0(RelBuilder builder) {
-    return builder.scan("EMP");
+    return builder.scan("BONUS");
   }
-
+//here we are scanning and filtering here, as you can see SELECT * FROM EMP WHERE SAL > 2000;
+//as you can see here, the filter is not based on the aggregate's column but rather the SAL column itself
   private RelBuilder example1(RelBuilder builder) {
     return builder
         .scan("EMP")
@@ -75,27 +75,36 @@ public class RelBuilderExample1 {
             )
         );
   }
+  //here we just changed the the greater_than to a less_than
   private RelBuilder example2(RelBuilder builder) {
     return builder
         .scan("EMP")
         .filter(
             builder.call(
-                SqlStdOperatorTable.GREATER_THAN,
+                SqlStdOperatorTable.LESS_THAN,
                 builder.field("SAL"),
                 builder.literal(2000)
             )
         );
   }
+  //now here we are joining two scans, and we projecting two fields which would be like:
+  // SELECT ENAME, DNAME FROM EMP INNER JOIN DEPT ON DEPT.DEPTNO = EMP.DEPTNO
   private RelBuilder example3(RelBuilder builder) {
     return builder
         .scan("EMP")
         .scan("DEPT")
-        .join(JoinRelType.INNER, "DEPTNO") // Join on DEPTNO
+        .join(JoinRelType.INNER, "DEPTNO") 
         .project(
             builder.field("ENAME"),
             builder.field("DNAME")
         );
   }
+/**
+SELECT COUNT(*) AS EMP_COUNT 
+FROM EMP 
+GROUP BY DEPTNO 
+HAVING COUNT(*) > 3;
+  */
   private RelBuilder example4(RelBuilder builder) {
     return builder
         .scan("EMP")
